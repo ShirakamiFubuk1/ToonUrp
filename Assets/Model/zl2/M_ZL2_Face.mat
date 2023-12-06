@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: M_ZL2_Face
   m_Shader: {fileID: 4800000, guid: 9b2a63df68505c0449487b124f1fae85, type: 3}
-  m_ShaderKeywords: _IS_FACE_OFF
+  m_ShaderKeywords: _IS_FACE_ON _IS_METAL_OFF
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -106,12 +106,12 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _IS_FACE: 1
-    - _IS_METAL: 0
+    - _IS_FACE: 0
+    - _IS_METAL: 1
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _OutlineOffset: 0
-    - _OutlineWidth: 0.005
+    - _OutlineWidth: 0.01
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
@@ -145,9 +145,10 @@ Material:
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
     - _RimColor: {r: 1, g: 0.9, b: 1, a: 1}
     - _RimLightColor: {r: 0, g: 0, b: 0, a: 0}
-    - _ShadowColor: {r: 0.83137256, g: 0.7, b: 0.8784314, a: 1}
+    - _ShadowColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpaceColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _StaticShadowColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &4415306892663442002
 MonoBehaviour:

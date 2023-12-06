@@ -119,7 +119,7 @@ Material:
     - _RimBloomMulti: 1.115
     - _RimOffsetX: 0
     - _RimOffsetY: 0
-    - _RimRange: 0.5
+    - _RimRange: 0.24
     - _RimSmooth: 0.06
     - _ShadowOffset: 1
     - _ShadowRange: 0.5

@@ -8,12 +8,13 @@ Shader "Test/ToonURP1"
         _DetailMap("Detail Map", 2D) = "white" {}
     	_FaceShadow("FaceShadowMap",2D) = "white"{}
     	_BaseColor("Base Color",Color) = (0,0,0,0) 	
-        _ToonThesHold("ToonThesHold", Range(0,2)) = 0.0
+        _ToonThesHold("ToonThesHold", Range(0,1)) = 0.0
         _ToonHardness("ToonHardness", float) = 50
         _SpecColor("SpecColor", Color) = (1,1,1,1)
         _SpecSize("SpecSize", Range(0,1)) = 0.1
         _RimLightColor("RimLight Color", Color) = (0,0,0,0)
     	
+    	_StaticShadowColor("Static Shadow Color",Color) = (1,1,1,1)
 	    _ShadowColor("ShadowColor",Color) = (0.7,0.7,0.8,1)
 		_ShadowRange("ShadowRange",Range(0,1)) = 0.5
 		_ShadowSmooth("ShadowSmooth",Range(0,1)) = 0.05
@@ -119,6 +120,7 @@ Shader "Test/ToonURP1"
                 float _RimSmooth;
                 float _RimOffsetX;
                 float _RimOffsetY;
+				float4 _StaticShadowColor;
 				float4 _ShadowColor;
 				float _ShadowRange;
 				float _ShadowSmooth;
@@ -228,7 +230,8 @@ Shader "Test/ToonURP1"
                 //ILM贴图
                 half4 ilmMap = SAMPLE_TEXTURE2D(_ILMMap,sampler_ILMMap,uv1);
                 half specIntensity = ilmMap.r;//控制高光强度
-                half diffuseControl = ilmMap.g * 2.0 - 1.0;//控制光照的偏移
+                //half diffuseControl = ilmMap.g * 2.0 - 1.0;//控制光照的偏移
+            	half diffuseControl = ilmMap.g;
                 half specSize = ilmMap.b;//控制高光形状大小
                 half innerLine = ilmMap.a;//内描线
                 //顶点色
@@ -255,71 +258,65 @@ Shader "Test/ToonURP1"
 
                 //漫反射
                 half NdotL = dot(normalDir,lightDir);
-                half half_lambert = saturate((NdotL + 1.0) * 0.5);
-                half lambert_term = half_lambert * ao + diffuseControl;
-                half toon_diffuse = 1-saturate((lambert_term - _ToonThesHold) * _ToonHardness);
+                half halfLambert = saturate((NdotL + 1.0) * 0.5);
+                half lambertTerm = halfLambert * ao + diffuseControl;
+                half toon_diffuse = 1-saturate((lambertTerm - _ToonThesHold) * _ToonHardness);
             	
                 //测试阴影
-                half testNdotL = dot(lightDir,i.normal_world);
-                half shadowThreshold = ilmMap.g;
+                half shadowThreshold = diffuseControl;
                 shadowThreshold *= i.vertex_color;
                 shadowThreshold = 1-shadowThreshold;
-                float specularIntensity = ilmMap.r;
-                float specularSize = 1-ilmMap.b;
                 float3 brightColor = baseColor.rgb;
-                float3 shadowColor = baseColor.rgb * sssColor.rgb;
-                
-                testNdotL -= shadowThreshold;
-                testNdotL -= 0.2f;
+                float3 shadowColor = baseColor.rgb * sssColor.rgb * _ShadowColor;
+                NdotL -= shadowThreshold;
+                NdotL -= 0.2f;
+                half specStrength = specIntensity;
 
-                half specStrength = specularIntensity;
+                float4 toonDiffuse = float4(1,1,1,1);
 
-                float4 test_Color = float4(0,0,0,1);
-
-				if (testNdotL < 0)
+				if (NdotL < 0)
 				{
-					
-					if ( testNdotL < - specularSize -0.5f && specStrength <= 0.5f) // -0.5f)
+					if ( NdotL < - specSize -0.5f && specStrength <= 0.5f) // -0.5f)
 					{
-						test_Color.rgb = shadowColor *(0.5f + specStrength);// (specStrength + 0.5f);// 0.5f; //  *s.ShadowColor;
+						toonDiffuse.rgb = shadowColor * (0.5f + specStrength)* _StaticShadowColor;;// (specStrength + 0.5f);// 0.5f; //  *s.ShadowColor;
 					}
 					else
 					{
-						test_Color.rgb = shadowColor;
+						toonDiffuse.rgb = shadowColor * _StaticShadowColor;
 					}
 				}
 				else
 				{
-					if (specularSize < 1 && testNdotL * 1.8f > specularSize && specStrength >= 0.5f) //  0.5f) // 1.0f)
+					if (specSize < 1 && NdotL * 1.8f > specSize && specStrength >= 0.5f) //  0.5f) // 1.0f)
 					{
-						test_Color.rgb = brightColor * (0.5f + specStrength);// 1.5f;//  *(specStrength * 2);// 2; // lighter
+						toonDiffuse.rgb = brightColor * (0.5f + specStrength);// 1.5f;//  *(specStrength * 2);// 2; // lighter
 					}
 					else
 					{
-						test_Color.rgb = brightColor;
+						toonDiffuse.rgb = brightColor;
 					}
-				
 				}
             	
-            	//阴影
             	half Lambert = dot(i.normal_world,mainLight.direction) + _ShadowOffset;
             	half ramp = smoothstep(0,_ShadowSmooth,Lambert-_ShadowRange);
+            	half3 final_diffuse = 1;
+            	final_diffuse *= toonDiffuse;
                 //half3 final_diffuse = lerp(base_color,sss_color,toon_diffuse)*mainLight.shadowAttenuation;
-                half3 final_diffuse = lerp(baseColor,baseColor*sssColor,toon_diffuse);
+                //half3 final_diffuse = lerp(baseColor,baseColor*sssColor,toon_diffuse);
                 //half3 final_diffuse = lerp(brightColor,shadowColor,toon_diffuse);
                 //half3 final_diffuse = lerp(_ShadowColor*sss_color.r,base_color,ramp);
 
-#ifndef  _IS_FACE_ON            	
+			#ifndef  _IS_FACE_ON            	
             	half3 final_shadow = lerp(_ShadowColor,float3(1,1,1),ramp);            	
             	final_diffuse *= final_shadow;
-#endif            	
+			#endif            	
             	
                 //高光
                 float NdotV = (dot(normalDir,viewDir) +1 )*0.5;
                 float spec_term = NdotV * ao + diffuseControl;
-                spec_term = half_lambert * 0.9 + spec_term * 0.1;
+                spec_term = halfLambert * 0.9 + spec_term * 0.1;
                 half3 toon_spec = saturate((spec_term - 1.0 + specSize*_SpecSize)*500);
-                toon_spec *= lerp(0.05,0.8,max(dot(i.normal_world,mainLight.direction),0.0));
+                toon_spec *= lerp(0.05,0.8,max(NdotL,0.0));
                 half3 spec_color = (_SpecColor.rgb + baseColor) * 0.5;
                 half3 final_spec = spec_color * toon_spec * specIntensity;
 
@@ -332,23 +329,22 @@ Shader "Test/ToonURP1"
 
                 //边缘光
                 half f = 1.0 - saturate(dot(viewDir,i.normal_world));
-                half rimRamp = smoothstep(0,_RimSmooth,dot(normalDir,viewDir-float3(_RimOffsetX,_RimOffsetY,0)) - _RimRange);
+                half rimRamp = smoothstep(0,_RimSmooth,dot(normalDir,viewDir+float3(_RimOffsetX,_RimOffsetY,0)) - _RimRange);
                 half rimBloom = pow(f,_RimBloomExp) * _RimBloomMulti * NdotL;
                 half3 final_rimlight = f * _RimColor.rgb * _RimColor.a * mainLight.color * rimBloom * max(baseMask,0.3);
                 final_rimlight = max(0,final_rimlight);
-                final_rimlight = lerp(float3(1,1,1),final_rimlight,rimRamp) * _RimColor;
+                final_rimlight = lerp(float3(1,1,1),final_rimlight,rimRamp) * _RimColor * sssAlpha;
                 
                 //内描线
                 half3 inner_line_color = lerp(baseColor * 0.2 ,float3(1.0,1.0,1.0),innerLine);
                 half3 detail_color = SAMPLE_TEXTURE2D(_DetailMap,sampler_DetailMap,uv2);//第二套uv
                 detail_color = lerp(baseColor * 0.2 ,float3(1.0,1.0,1.0),detail_color);
                 half3 final_line = inner_line_color * inner_line_color * detail_color;
-                half3 final_color = (test_Color + final_spec + final_rimlight)*max(0.8,final_metalColor)*final_line*_BaseColor;
+                half3 final_color = (final_diffuse + final_spec + final_rimlight)*max(0.8,final_metalColor)*final_line*_BaseColor;
                 //final_color = sqrt(max(exp2(log2(max(final_color, 0.0)) * 2.2),0.0));
-                //final_color = sss_map * base_color;
+                //final_color = sssAlpha;
 
-
-#if _IS_FACE_ON
+			#if _IS_FACE_ON
                 //face shadow
 				float4 leftFaceTex = SAMPLE_TEXTURE2D(_FaceShadow, sampler_FaceShadow, i.uv);
 				float4 rightFaceTex = SAMPLE_TEXTURE2D(_FaceShadow, sampler_FaceShadow, float2(1 - i.uv.x, i.uv.y));
@@ -364,13 +360,12 @@ Shader "Test/ToonURP1"
                 {
                     final_color*=lerp(float3(1,1,1),_ShadowColor.rgb,bias);
                 }
-#endif
+			#endif
+            	
                 return float4(final_color,1.0);
             }
+        ENDHLSL
 
-
-            
-            ENDHLSL
         }
         Pass{
             Cull Front

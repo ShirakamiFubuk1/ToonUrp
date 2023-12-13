@@ -7,12 +7,14 @@ Shader "Test/ToonURP1"
         _ILMMap("ILM Map", 2D) = "gray" {}
         _DetailMap("Detail Map", 2D) = "white" {}
     	_FaceShadow("FaceShadowMap",2D) = "white"{}
-    	_BaseColor("Base Color",Color) = (0,0,0,0) 	
-        _ToonThesHold("ToonThesHold", Range(0,1)) = 0.0
-        _ToonHardness("ToonHardness", float) = 50
+    	_EmissionMap("EmissionMap",2D) = "white"{}
+    	_BaseColor("Base Color",Color) = (0,0,0,0)
+    	[HDR] _EmissionColor("Emission Color",Color) = (0,0,0,0) 	
+//        _ToonThesHold("ToonThesHold", Range(0,1)) = 0.0
+//        _ToonHardness("ToonHardness", float) = 50
         _SpecColor("SpecColor", Color) = (1,1,1,1)
         _SpecSize("SpecSize", Range(0,1)) = 0.1
-        _RimLightColor("RimLight Color", Color) = (0,0,0,0)
+//        _RimLightColor("RimLight Color", Color) = (0,0,0,0)
     	
     	_StaticShadowColor("Static Shadow Color",Color) = (1,1,1,1)
 	    _ShadowColor("ShadowColor",Color) = (0.7,0.7,0.8,1)
@@ -21,8 +23,8 @@ Shader "Test/ToonURP1"
 		_ShadowOffset("ShadowOffset",float) = 1
         
         _RimColor("RimColor",Color) = (1,0.9,1)
-		_RimBloomExp("RimBloomExp",Range(0,10)) = 0.9
-		_RimBloomMulti("RimBloomMulti",Range(0,2)) = 0.9
+//		_RimBloomExp("RimBloomExp",Range(0,10)) = 0.9
+//		_RimBloomMulti("RimBloomMulti",Range(0,2)) = 0.9
         _RimRange("RimRange",Range(0,1)) = 0.5
         _RimSmooth("RimSmooth",Range(0,1)) = 0.06
         _RimOffsetX("RimOffsetX",Range(-1,1)) = 0
@@ -108,6 +110,7 @@ Shader "Test/ToonURP1"
 
             CBUFFER_START(UnityPerMaterial)
 				float4 _BaseColor;
+				float4 _EmissionColor;
                 float _ToonThesHold;
                 float _ToonHardness;
                 float4 _SpecColor;
@@ -137,6 +140,7 @@ Shader "Test/ToonURP1"
             TEXTURE2D(_ILMMap);SAMPLER(sampler_ILMMap);
             TEXTURE2D(_DetailMap);SAMPLER(sampler_DetailMap);
             TEXTURE2D(_FaceShadow);SAMPLER(sampler_FaceShadow);
+            TEXTURE2D(_EmissionMap);SAMPLER(sampler_EmissionMap);
 
 #define MIN_REFLECTIVITY 0.04
 
@@ -234,6 +238,8 @@ Shader "Test/ToonURP1"
             	half diffuseControl = ilmMap.g;
                 half specSize = ilmMap.b;//控制高光形状大小
                 half innerLine = ilmMap.a;//内描线
+            	//Emission贴图
+            	half4 emissionColor = SAMPLE_TEXTURE2D(_EmissionMap,sampler_EmissionMap,uv1);
                 //顶点色
                 float ao = i.vertex_color.r;
                 //金属区域
@@ -250,19 +256,19 @@ Shader "Test/ToonURP1"
                 BRDF brdf = GetBRDF(surface);
 
 			#ifdef _IS_METAL_ON                
-                float3 final_metalColor = GetLighting(surface,brdf,GetMainLight()) * specSize * 2;
+                float3 final_metalColor = GetLighting(surface,brdf,GetMainLight()) * specSize;
 			#elif _IS_METAL_OFF
                 float3 final_metalColor = 0;
 			#endif
                 
 
-                //漫反射
+                //漫反射Old
                 half NdotL = dot(normalDir,lightDir);
                 half halfLambert = saturate((NdotL + 1.0) * 0.5);
                 half lambertTerm = halfLambert * ao + diffuseControl;
                 half toon_diffuse = 1-saturate((lambertTerm - _ToonThesHold) * _ToonHardness);
             	
-                //测试阴影
+                //阴影
                 half shadowThreshold = diffuseControl;
                 shadowThreshold *= i.vertex_color;
                 shadowThreshold = 1-shadowThreshold;
@@ -276,9 +282,9 @@ Shader "Test/ToonURP1"
 
 				if (NdotL < 0)
 				{
-					if ( NdotL < - specSize -0.5f && specStrength <= 0.5f) // -0.5f)
+					if ( NdotL < - specSize -0.5f && specStrength <= 0.1f) // -0.5f)
 					{
-						toonDiffuse.rgb = shadowColor * (0.5f + specStrength)* _StaticShadowColor;;// (specStrength + 0.5f);// 0.5f; //  *s.ShadowColor;
+						toonDiffuse.rgb = shadowColor * (0.5f + specStrength);// (specStrength + 0.5f);// 0.5f; //  *s.ShadowColor;
 					}
 					else
 					{
@@ -287,7 +293,7 @@ Shader "Test/ToonURP1"
 				}
 				else
 				{
-					if (specSize < 1 && NdotL * 1.8f > specSize && specStrength >= 0.5f) //  0.5f) // 1.0f)
+					if (specSize < 1 && NdotL * 1.8f > specSize && specStrength >= 0.1f) //  0.5f) // 1.0f)
 					{
 						toonDiffuse.rgb = brightColor * (0.5f + specStrength);// 1.5f;//  *(specStrength * 2);// 2; // lighter
 					}
@@ -300,15 +306,16 @@ Shader "Test/ToonURP1"
             	half Lambert = dot(i.normal_world,mainLight.direction) + _ShadowOffset;
             	half ramp = smoothstep(0,_ShadowSmooth,Lambert-_ShadowRange);
             	half3 final_diffuse = 1;
-            	final_diffuse *= toonDiffuse;
+            	
                 //half3 final_diffuse = lerp(base_color,sss_color,toon_diffuse)*mainLight.shadowAttenuation;
                 //half3 final_diffuse = lerp(baseColor,baseColor*sssColor,toon_diffuse);
                 //half3 final_diffuse = lerp(brightColor,shadowColor,toon_diffuse);
                 //half3 final_diffuse = lerp(_ShadowColor*sss_color.r,base_color,ramp);
 
 			#ifndef  _IS_FACE_ON            	
-            	half3 final_shadow = lerp(_ShadowColor,float3(1,1,1),ramp);            	
-            	final_diffuse *= final_shadow;
+            	// half3 final_shadow = lerp(_ShadowColor,float3(1,1,1),ramp);            	
+            	// final_diffuse *= final_shadow;
+            	final_diffuse *= toonDiffuse;
 			#endif            	
             	
                 //高光
@@ -328,28 +335,20 @@ Shader "Test/ToonURP1"
                 // float3 final_rimlight = toon_rimlight * rim_color * max(base_mask,0.3) * (1-toon_diffuse) * _RimLightColor.a;
 
                 //边缘光
-                half f = 1.0 - saturate(dot(viewDir,i.normal_world));
-                half rimRamp = smoothstep(0,_RimSmooth,dot(normalDir,viewDir+float3(_RimOffsetX,_RimOffsetY,0)) - _RimRange);
+                half f = 1.0 - saturate(dot(-viewDir,normalDir));
+                half rimRamp = smoothstep(0,_RimSmooth,dot(normalDir,viewDir+float3(_RimOffsetX,_RimOffsetY,0)) - _RimRange * 0.25);
                 half rimBloom = pow(f,_RimBloomExp) * _RimBloomMulti * NdotL;
                 half3 final_rimlight = f * _RimColor.rgb * _RimColor.a * mainLight.color * rimBloom * max(baseMask,0.3);
-                final_rimlight = max(0,final_rimlight);
+                final_rimlight = max(0,saturate(final_rimlight-0.1));
                 final_rimlight = lerp(float3(1,1,1),final_rimlight,rimRamp) * _RimColor * sssAlpha;
-                
-                //内描线
-                half3 inner_line_color = lerp(baseColor * 0.2 ,float3(1.0,1.0,1.0),innerLine);
-                half3 detail_color = SAMPLE_TEXTURE2D(_DetailMap,sampler_DetailMap,uv2);//第二套uv
-                detail_color = lerp(baseColor * 0.2 ,float3(1.0,1.0,1.0),detail_color);
-                half3 final_line = inner_line_color * inner_line_color * detail_color;
-                half3 final_color = (final_diffuse + final_spec + final_rimlight)*max(0.8,final_metalColor)*final_line*_BaseColor;
-                //final_color = sqrt(max(exp2(log2(max(final_color, 0.0)) * 2.2),0.0));
-                //final_color = sssAlpha;
 
 			#if _IS_FACE_ON
                 //face shadow
+            	final_diffuse *= baseColor;
 				float4 leftFaceTex = SAMPLE_TEXTURE2D(_FaceShadow, sampler_FaceShadow, i.uv);
 				float4 rightFaceTex = SAMPLE_TEXTURE2D(_FaceShadow, sampler_FaceShadow, float2(1 - i.uv.x, i.uv.y));
 				float2 left = normalize(TransformObjectToWorld(float3(1,0,0)).xz);
-            	float2 front = normalize(TransformObjectToWorld(float3(0,0,1)).xz);
+            	float2 front = normalize(TransformObjectToWorld(float3(0,1,0)).xz);
             	float2 mainLightDir = normalize(mainLight.direction.xz);
                 
                 float angle = 1-clamp(0,1,dot(front,mainLightDir)*0.5+0.5);
@@ -358,9 +357,19 @@ Shader "Test/ToonURP1"
                 float isShadow = step(texDirect,angle);
                 if(angle>0.99||isShadow==1)
                 {
-                    final_color*=lerp(float3(1,1,1),_ShadowColor.rgb,bias);
+                    final_diffuse*=lerp(float3(1,1,1),_ShadowColor.rgb,bias);
                 }
-			#endif
+            	
+			#endif                
+                //内描线
+                half3 inner_line_color = lerp(baseColor * 0.2 ,float3(1.0,1.0,1.0),innerLine);
+                half3 detail_color = SAMPLE_TEXTURE2D(_DetailMap,sampler_DetailMap,uv2);//第二套uv
+                detail_color = lerp(baseColor * 0.2 ,float3(1.0,1.0,1.0),detail_color);
+                half3 final_line = inner_line_color * inner_line_color * detail_color;
+                half3 final_color = (final_diffuse + final_spec + final_rimlight + emissionColor * _EmissionColor)*max(0.8,final_metalColor)*final_line*_BaseColor;
+                final_color = sqrt(max(exp2(log2(max(final_color, 0.0)) * 2.2),0.0));
+                //final_color = sssAlpha;
+
             	
                 return float4(final_color,1.0);
             }

@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Body
   m_Shader: {fileID: 4800000, guid: 9b2a63df68505c0449487b124f1fae85, type: 3}
-  m_ShaderKeywords: _IS_FACE_OFF
+  m_ShaderKeywords: _IS_FACE_OFF _IS_METAL_OFF
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -37,6 +37,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _EMISSION_COLOR_MAP:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 2800000, guid: 73626b1a30e81d74b9c8e7d1a3376312, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FaceShadow:
@@ -102,9 +106,9 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 1
     - _IS_FACE: 1
-    - _IS_METAL: 0
+    - _IS_METAL: 1
     - _METALNESS: 0
-    - _Metallic: 0
+    - _Metallic: 1
     - _Mode: 0
     - _OcclusionStrength: 1
     - _OutlineOffset: 0
@@ -116,24 +120,24 @@ Material:
     - _REFLECTIONS_WEIGHT: 1
     - _ReceiveShadows: 1
     - _RimBloomExp: 6
-    - _RimBloomMulti: 0.699
-    - _RimOffsetX: -0
-    - _RimOffsetY: 0.194
-    - _RimRange: 0.109
-    - _RimSmooth: 0.05
-    - _ShadowOffset: 1
-    - _ShadowRange: 1
+    - _RimBloomMulti: 0.061
+    - _RimOffsetX: -0.04
+    - _RimOffsetY: -0.05
+    - _RimRange: 0.824
+    - _RimSmooth: 0
+    - _ShadowOffset: 0
+    - _ShadowRange: 0
     - _ShadowSmooth: 0.05
-    - _Smoothness: 0.5
+    - _Smoothness: 0.558
     - _SmoothnessTextureChannel: 0
     - _SpaecSize: 0.1
-    - _SpecSize: 0.1
+    - _SpecSize: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Surface: 0
     - _TRANSPARENCY: 0
-    - _ToonHardness: -1
-    - _ToonThesHold: 1
+    - _ToonHardness: 50
+    - _ToonThesHold: 0.358
     - _UVSec: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
@@ -142,12 +146,13 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _EMISSION_COLOR: {r: 0, g: 0, b: 0, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissionColor: {r: 0.31210902, g: 0.6415094, b: 0.36002177, a: 1}
+    - _OutlineColor: {r: 0.19811317, g: 0.05153077, b: 0.05153077, a: 0}
     - _REFLECTIONS_COLOR: {r: 1, g: 1, b: 1, a: 1}
-    - _RimColor: {r: 1, g: 0.9, b: 1, a: 1}
-    - _RimLightColor: {r: 0, g: 0, b: 0, a: 0}
-    - _ShadowColor: {r: 0.4904257, g: 0.40908045, b: 0.51886785, a: 1}
+    - _RimColor: {r: 0.42577425, g: 0.820533, b: 0.8584906, a: 1}
+    - _RimLightColor: {r: 1, g: 1, b: 1, a: 0}
+    - _ShadowColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpaceColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
+    - _StaticShadowColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

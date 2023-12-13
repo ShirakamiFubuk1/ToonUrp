@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: M_ZL2_Eye
   m_Shader: {fileID: 4800000, guid: 9b2a63df68505c0449487b124f1fae85, type: 3}
-  m_ShaderKeywords: _IS_FACE_OFF
+  m_ShaderKeywords: _IS_FACE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -106,7 +106,7 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _IS_FACE: 1
+    - _IS_FACE: 0
     - _IS_METAL: 0
     - _Metallic: 0
     - _OcclusionStrength: 1

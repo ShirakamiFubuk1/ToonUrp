@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: M_ZL2_Hair
   m_Shader: {fileID: 4800000, guid: 9b2a63df68505c0449487b124f1fae85, type: 3}
-  m_ShaderKeywords: _IS_FACE_OFF _IS_METAL_OFF
+  m_ShaderKeywords: _IS_FACE_OFF _IS_METAL_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -107,7 +107,7 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _IS_FACE: 1
-    - _IS_METAL: 1
+    - _IS_METAL: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _OutlineOffset: 0
@@ -120,9 +120,9 @@ Material:
     - _RimMax: 0.9
     - _RimMin: 0.1
     - _RimOffset: 1
-    - _RimOffsetX: 0.2
-    - _RimOffsetY: 0
-    - _RimRange: 0.1
+    - _RimOffsetX: -0.39
+    - _RimOffsetY: -0.02
+    - _RimRange: 0
     - _RimSmooth: 0.05
     - _ShadowOffset: 1
     - _ShadowRange: 1
@@ -143,7 +143,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 0.2264151, g: 0.118700095, b: 0.118700095, a: 1}
-    - _RimColor: {r: 0.8113208, g: 0.3258404, b: 0.3258404, a: 1}
+    - _RimColor: {r: 0.8584906, g: 0.38990685, b: 0.36098254, a: 1}
     - _RimLightColor: {r: 0, g: 0, b: 0, a: 0}
     - _ShadowColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpaceColor: {r: 1, g: 1, b: 1, a: 1}

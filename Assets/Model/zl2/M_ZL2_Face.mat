@@ -120,8 +120,8 @@ Material:
     - _RimMax: 0.9
     - _RimMin: 0.1
     - _RimOffset: 0
-    - _RimOffsetX: 0
-    - _RimOffsetY: 0
+    - _RimOffsetX: -0.31
+    - _RimOffsetY: -0.2
     - _RimRange: 0.05
     - _RimSmooth: 0.05
     - _ShadowOffset: 1
@@ -145,7 +145,7 @@ Material:
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
     - _RimColor: {r: 1, g: 0.9, b: 1, a: 1}
     - _RimLightColor: {r: 0, g: 0, b: 0, a: 0}
-    - _ShadowColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ShadowColor: {r: 0.6698113, g: 0.6698113, b: 0.6698113, a: 1}
     - _SpaceColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _StaticShadowColor: {r: 1, g: 1, b: 1, a: 1}
